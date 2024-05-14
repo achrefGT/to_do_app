@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "448935747682",
+    "project_id": "todoapp-ffab9",
+    "storage_bucket": "todoapp-ffab9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:448935747682:android:d2c7ba947e5a22806ff13b",
+        "android_client_info": {
+          "package_name": "com.enit.to_do_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV-bLTcspmMeCchOkVDwOU3nAPDllIpSw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
