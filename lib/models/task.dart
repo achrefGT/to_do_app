@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 class Task {
-  String? id;
+  int? id;
   String? title;
   String? note;
   bool? isCompleted;
@@ -26,7 +26,7 @@ class Task {
   });
 
   Task copyWith({
-    String? id,
+    int? id,
     String? title,
     String? note,
     bool? isCompleted,
@@ -68,7 +68,7 @@ class Task {
 
   factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
-      id: map['id'] != null ? map['id'] as String : null,
+      id: map['id'] != null ? map['id'] as int : null,
       title: map['title'] != null ? map['title'] as String : null,
       note: map['note'] != null ? map['note'] as String : null,
       isCompleted:

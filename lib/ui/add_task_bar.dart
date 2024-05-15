@@ -293,7 +293,7 @@ class _AddTaskPageState extends ConsumerState<AddTaskPage> {
 
   Future<void> _addTaskToDB() async {
     // Add the task using taskController
-    final String? newTask = await ref.read(taskController).addTask(
+    await ref.read(taskController).addTask(
       task: Task(
         note: _noteController.text.trim(),
         title: _titleController.text.trim(),

@@ -12,7 +12,7 @@ final getTasksController = FutureProvider<List<Task>?>((ref) {
 class TaskController {
   var taskList = <Task>[];
 
-  Future<String?> addTask({Task? task}) async {
+  Future<int?> addTask({Task? task}) async {
     return await DBHelper.insert(task!);
   }
 
@@ -34,7 +34,6 @@ class TaskController {
   }
 
   void update(Task task) async {
-    print("${task.id}9999999999999999999999999999999999999999999999999999999999999999999999999999999999");
-    await DBHelper.update(task.id! as String);
+    await DBHelper.update(task);
   }
 }

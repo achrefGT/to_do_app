@@ -159,7 +159,7 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
                   borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20))),
-              height: task.isCompleted == 1
+              height: task.isCompleted == true
                   ? MediaQuery.of(context).size.height * 0.24
                   : MediaQuery.of(context).size.height * 0.32,
               child: Column(
@@ -173,7 +173,7 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
                             isDarkTheme ? Colors.grey[600] : Colors.grey[300]),
                   ),
                   const Spacer(),
-                  task.isCompleted == 1
+                  task.isCompleted == true
                       ? Container()
                       : _bottomSheetButton(
                       context: context,

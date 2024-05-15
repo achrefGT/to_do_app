@@ -1,21 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:to_do_app/models/task.dart';
+import 'dart:math';
+
 
 
 class DBHelper {
   static CollectionReference _tasksCollection =
   FirebaseFirestore.instance.collection('tasks');
 
-  static Future<String?> insert(Task task) async {
+  static int _IdCounter = 0;
+
+  static Future<int?> insert(Task task) async {
     try {
       // Generate a unique ID for the task
-      String taskId = _tasksCollection.doc().id;
+      int taskId = _IdCounter++;
 
       // Set the task ID
       task.id = taskId;
 
       // Add the task to Firestore with the same ID
-      await _tasksCollection.doc(taskId).set(task.toMap());
+      await _tasksCollection.doc(taskId.toString()).set(task.toMap());
 
       print("Task added successfully with ID: $taskId");
       return taskId;
@@ -42,17 +46,27 @@ class DBHelper {
 
   static Future<void> delete(Task task) async {
     try {
-      await _tasksCollection.doc(task.id as String?).delete();
-      print("Task deleted successfully.");
+      // Convert the int id to a string
+      String docId = task.id.toString();
+
+      // Update the task in Firestore using the document ID
+      await _tasksCollection.doc(docId).delete();
+
+      print("Task deleted successfully with ID: ${task.id}");
     } catch (e) {
       print("Error deleting task: $e");
     }
   }
 
-  static Future<void> update(String id) async {
+  static Future<void> update(Task task) async {
     try {
-      await _tasksCollection.doc(id).update({'isCompleted': true});
-      print("Task updated successfully.");
+      // Convert the int id to a string
+      String docId = task.id.toString();
+
+      // update the isCompleted field
+      await _tasksCollection.doc(docId).update({'isCompleted': true});
+
+      print("Task updated successfully with ID: ${task.id}");
     } catch (e) {
       print("Error updating task: $e");
     }
