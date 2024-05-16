@@ -1,20 +1,22 @@
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:to_do_app/auth/auth_service.dart';
 import 'package:to_do_app/auth/signup_screen.dart';
+import 'package:to_do_app/controllers/task_controller.dart';
 import 'package:to_do_app/ui/home_page.dart';
 import 'package:to_do_app/ui/widgets/auth_button.dart';
 import 'package:to_do_app/ui/widgets/textfield.dart';
-import 'package:flutter/material.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class LoginScreen extends ConsumerStatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _auth = AuthService();
 
   final _email = TextEditingController();
@@ -22,9 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    super.dispose();
     _email.dispose();
     _password.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,8 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             const Spacer(),
-            const Text("Login",
-                style: TextStyle(fontSize: 40, fontWeight: FontWeight.w500)),
+            const Text(
+              "Login",
+              style: TextStyle(fontSize: 40, fontWeight: FontWeight.w500),
+            ),
             const SizedBox(height: 50),
             CustomTextField(
               hint: "Enter Email",
@@ -55,36 +59,48 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: _login,
             ),
             const SizedBox(height: 5),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              const Text("Already have an account? "),
-              InkWell(
-                onTap: () => goToSignup(context),
-                child:
-                const Text("Signup", style: TextStyle(color: Colors.red)),
-              )
-            ]),
-            const Spacer()
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Already have an account? "),
+                InkWell(
+                  onTap: () => goToSignup(context),
+                  child: const Text(
+                    "Signup",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                )
+              ],
+            ),
+            const Spacer(),
           ],
         ),
       ),
     );
   }
 
-  goToSignup(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const SignupScreen()),
-  );
+  void goToSignup(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SignupScreen()),
+    );
+  }
 
-  goToHome(BuildContext context) => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const HomePageUi()),
-  );
+  void goToHome(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePageUi()),
+    );
+  }
 
-  _login() async {
-    final user =
-    await _auth.loginUserWithEmailAndPassword(_email.text, _password.text);
+  void _login() async {
+    final user = await _auth.loginUserWithEmailAndPassword(
+      _email.text,
+      _password.text,
+    );
 
     if (user != null) {
+      await ref.refresh(getTasksController);
       log("User Logged In");
       goToHome(context);
     }

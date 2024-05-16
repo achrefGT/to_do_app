@@ -347,8 +347,13 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
           ),
 
           onPressed: () async {
-            ref.refresh(getTasksController);
+
+
+
+            // Perform sign out
             await auth.signout();
+
+            // Navigate to login screen
             goToLogin(context);
           },
         ),
