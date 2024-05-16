@@ -12,6 +12,7 @@ class Task {
   int? color;
   int? remind;
   String? repeat;
+  String? userId;
   Task({
     this.id,
     this.title,
@@ -23,6 +24,7 @@ class Task {
     this.color,
     this.remind,
     this.repeat,
+    this.userId,
   });
 
   Task copyWith({
@@ -36,6 +38,7 @@ class Task {
     int? color,
     int? remind,
     String? repeat,
+    String? userId,
   }) {
     return Task(
       id: id ?? this.id,
@@ -48,6 +51,7 @@ class Task {
       color: color ?? this.color,
       remind: remind ?? this.remind,
       repeat: repeat ?? this.repeat,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -63,6 +67,7 @@ class Task {
       'color': color,
       'remind': remind,
       'repeat': repeat,
+      'userId' : userId,
     };
   }
 
@@ -79,6 +84,7 @@ class Task {
       color: map['color'] != null ? map['color'] as int : null,
       remind: map['remind'] != null ? map['remind'] as int : null,
       repeat: map['repeat'] != null ? map['repeat'] as String : null,
+      userId: map['userId'] != null ? map['userId'] as String : null,
     );
   }
 
@@ -89,7 +95,7 @@ class Task {
 
   @override
   String toString() {
-    return 'Task(id: $id, title: $title, note: $note, isCompleted: $isCompleted, date: $date, startTime: $startTime, endTime: $endTime, color: $color, remind: $remind, repeat: $repeat)';
+    return 'Task(id: $id, title: $title, note: $note, isCompleted: $isCompleted, date: $date, startTime: $startTime, endTime: $endTime, color: $color, remind: $remind, repeat: $repeat, userId: $userId)';
   }
 
   @override
@@ -106,6 +112,7 @@ class Task {
         other.color == color &&
         other.remind == remind &&
         other.repeat == repeat;
+        other.userId == userId;
   }
 
   @override
@@ -119,6 +126,7 @@ class Task {
     endTime.hashCode ^
     color.hashCode ^
     remind.hashCode ^
+    userId.hashCode ^
     repeat.hashCode;
   }
 }

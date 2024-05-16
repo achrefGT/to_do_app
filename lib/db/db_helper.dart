@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:to_do_app/models/task.dart';
 import 'dart:math';
 
@@ -35,8 +36,24 @@ class DBHelper {
 
   static Future<List<Map<String, dynamic>>> query() async {
     try {
-      QuerySnapshot querySnapshot = await _tasksCollection.get();
-      return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      // Get the current user ID
+      final FirebaseAuth auth = FirebaseAuth.instance;
+      final User? user = auth.currentUser;
+
+      if (user != null) {
+        // User is authenticated, proceed to query tasks
+        String userId = user.uid;
+
+        // Query tasks where userId matches the current user's ID
+        QuerySnapshot querySnapshot = await _tasksCollection.where('userId', isEqualTo: userId).get();
+
+        // Convert the QuerySnapshot to a List<Map<String, dynamic>>
+        return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      } else {
+        // User is not authenticated, handle accordingly
+        // For example, return an empty list or show an error message
+        return [];
+      }
     } catch (e) {
       print("Error querying tasks: $e");
       return []; // Return an empty list in case of error

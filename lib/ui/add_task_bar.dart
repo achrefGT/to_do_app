@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -292,20 +293,33 @@ class _AddTaskPageState extends ConsumerState<AddTaskPage> {
 
 
   Future<void> _addTaskToDB() async {
-    // Add the task using taskController
-    await ref.read(taskController).addTask(
-      task: Task(
-        note: _noteController.text.trim(),
-        title: _titleController.text.trim(),
-        date: DateFormat.yMd().format(_selectedDate),
-        startTime: _startTime,
-        endTime: _endTime,
-        remind: _selectedRemind,
-        repeat: _selectedRepeat,
-        color: _selectedColor,
-        isCompleted: false,
-      ),
-    );
+    // Get the current user ID
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final User? user = auth.currentUser;
+
+    if (user != null) {
+      // User is authenticated, proceed to add the task
+      final String userId = user.uid;
+
+      // Add the task using taskController
+      await ref.read(taskController).addTask(
+        task: Task(
+          userId: userId, // Include the user ID in the task data
+          note: _noteController.text.trim(),
+          title: _titleController.text.trim(),
+          date: DateFormat.yMd().format(_selectedDate),
+          startTime: _startTime,
+          endTime: _endTime,
+          remind: _selectedRemind,
+          repeat: _selectedRepeat,
+          color: _selectedColor,
+          isCompleted: false,
+        ),
+      );
+    } else {
+      // User is not authenticated, handle accordingly
+      // For example, show an error message or redirect to the login screen
+    }
   }
 
 

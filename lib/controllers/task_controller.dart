@@ -4,6 +4,7 @@ import 'package:to_do_app/db/db_helper.dart';
 import '../models/task.dart';
 
 final taskController = Provider((ref) => TaskController());
+
 final getTasksController = FutureProvider<List<Task>?>((ref) {
   final tasks = ref.read(taskController).getTasks();
   return tasks;

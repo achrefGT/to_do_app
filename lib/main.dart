@@ -9,6 +9,7 @@ import 'package:to_do_app/ui/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 
+import 'auth/login_screen.dart';
 import 'ui/home_page.dart';
 
 void main() async {
@@ -37,7 +38,7 @@ class MyApp extends ConsumerWidget {
       theme: Themes.light,
       darkTheme: Themes.dark,
       themeMode: isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-      home: const HomePageUi(),
+      home: const LoginScreen(),
     );
   }
 }

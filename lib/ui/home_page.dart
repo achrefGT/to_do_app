@@ -6,25 +6,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:to_do_app/controllers/task_controller.dart';
 import 'package:to_do_app/services/theme_services.dart';
+import 'package:to_do_app/services/notification_services.dart';
+
 import 'package:to_do_app/ui/theme.dart';
 import 'package:to_do_app/ui/widgets/button.dart';
 
+import '../auth/auth_service.dart';
+import '../auth/login_screen.dart';
 import '../models/task.dart';
 import 'add_task_bar.dart';
 import 'widgets/task_tile.dart';
 
-import 'dart:math';
-
-String generateTaskId() {
-  // Get the current timestamp in milliseconds
-  int timestamp = DateTime.now().millisecondsSinceEpoch;
-
-  // Generate a random number between 0 and 999 (inclusive)
-  int random = Random().nextInt(1000);
-
-  // Concatenate the timestamp and random number to create a unique ID
-  return '$timestamp$random';
-}
 
 
 class HomePageUi extends ConsumerStatefulWidget {
@@ -34,9 +26,12 @@ class HomePageUi extends ConsumerStatefulWidget {
 }
 
 class _HomePageUiState extends ConsumerState<HomePageUi> {
+  NotifyHelper notifyHelper = NotifyHelper();
   DateTime _selectedDate = DateTime.now();
   @override
   void initState() {
+    notifyHelper.initializeNotification();
+    notifyHelper.requestIOSPermissions();
     super.initState();
   }
 
@@ -79,6 +74,11 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
                   if (task.repeat == "Daily") {
                     DateTime date = DateFormat.jm().parse(task.startTime.toString());
                     var myTime = DateFormat("HH:mm").format(date);
+                    notifyHelper.scheduledNotification(
+                      int.parse(myTime.toString().split(":")[0]),
+                      int.parse(myTime.toString().split(":")[1]),
+                      task,
+                    );
                     print("MyTime is :$myTime");
                     return AnimationConfiguration.staggeredList(
                       position: index,
@@ -319,13 +319,19 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
 
   _appBar() {
     final bool isDarkTheme = ref.watch(appThemeProvider).getTheme();
+    final auth = AuthService();
     return AppBar(
       backgroundColor: Theme.of(context).backgroundColor,
       elevation: 0,
       leading: GestureDetector(
         onTap: () {
           ref.watch(appThemeProvider.notifier).setTheme(!isDarkTheme);
-
+          notifyHelper.displayNotification(
+              title: "Theme Changed",
+              body: isDarkTheme
+                  ? "Acticated Light Theme"
+                  : "Acticated Dark Theme");
+          // notifyHelper.scheduledNotification();
         },
         child: Icon(
             isDarkTheme ? Icons.wb_sunny_outlined : Icons.nightlight_round,
@@ -333,12 +339,27 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
             color: isDarkTheme ? Colors.white : Colors.black),
       ),
       actions: [
-        Icon(Icons.person,
-            size: 20, color: isDarkTheme ? Colors.white : Colors.black),
-        const SizedBox(
-          width: 20,
-        )
+        IconButton(
+          icon: Icon(
+            Icons.logout,
+            size: 20,
+            color: isDarkTheme ? Colors.white : Colors.black,
+          ),
+
+          onPressed: () async {
+            ref.refresh(getTasksController);
+            await auth.signout();
+            goToLogin(context);
+          },
+        ),
+        SizedBox(width: 20),
       ],
     );
   }
+
+  goToLogin(BuildContext context) => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const LoginScreen()),
+  );
+
 }
