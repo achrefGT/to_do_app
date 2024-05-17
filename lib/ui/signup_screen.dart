@@ -2,28 +2,30 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:to_do_app/auth/auth_service.dart';
-import 'package:to_do_app/auth/signup_screen.dart';
-import 'package:to_do_app/controllers/task_controller.dart';
+import 'package:to_do_app/services/auth_service.dart';
+import 'package:to_do_app/ui/login_screen.dart';
 import 'package:to_do_app/ui/home_page.dart';
 import 'package:to_do_app/ui/widgets/auth_button.dart';
 import 'package:to_do_app/ui/widgets/textfield.dart';
+import '../controllers/task_controller.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignupScreen extends ConsumerStatefulWidget {
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _SignupScreenState createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _auth = AuthService();
 
+  final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
 
   @override
   void dispose() {
+    _name.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
@@ -38,10 +40,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           children: [
             const Spacer(),
             const Text(
-              "Login",
+              "Signup",
               style: TextStyle(fontSize: 40, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 50),
+            CustomTextField(
+              hint: "Enter Name",
+              label: "Name",
+              controller: _name,
+            ),
+            const SizedBox(height: 20),
             CustomTextField(
               hint: "Enter Email",
               label: "Email",
@@ -51,12 +59,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             CustomTextField(
               hint: "Enter Password",
               label: "Password",
+              isPassword: true,
               controller: _password,
             ),
             const SizedBox(height: 30),
             CustomButton(
-              label: "Login",
-              onPressed: _login,
+              label: "Signup",
+              onPressed: _signup,
             ),
             const SizedBox(height: 5),
             Row(
@@ -64,9 +73,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 const Text("Already have an account? "),
                 InkWell(
-                  onTap: () => goToSignup(context),
+                  onTap: () => goToLogin(context),
                   child: const Text(
-                    "Signup",
+                    "Login",
                     style: TextStyle(color: Colors.red),
                   ),
                 )
@@ -79,10 +88,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  void goToSignup(BuildContext context) {
+  void goToLogin(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const SignupScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
@@ -93,15 +102,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  void _login() async {
-    final user = await _auth.loginUserWithEmailAndPassword(
+  void _signup() async {
+    final user = await _auth.createUserWithEmailAndPassword(
       _email.text,
       _password.text,
     );
 
     if (user != null) {
       await ref.refresh(getTasksController);
-      log("User Logged In");
+      log("User Created Successfully");
       goToHome(context);
     }
   }

@@ -9,12 +9,27 @@ class DBHelper {
   static CollectionReference _tasksCollection =
   FirebaseFirestore.instance.collection('tasks');
 
-  static int _IdCounter = 0;
+  static int generateIntId() {
+    // Get current timestamp in milliseconds
+    int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    // Generate a random number between 0 and 9999
+    int random = Random().nextInt(10000);
+
+    // Concatenate timestamp and random number
+    // to ensure uniqueness of the ID
+    String idString = '$timestamp$random';
+
+    // Convert the concatenated string to an integer
+    int id = int.parse(idString);
+
+    return id;
+  }
 
   static Future<int?> insert(Task task) async {
     try {
       // Generate a unique ID for the task
-      int taskId = _IdCounter++;
+      int taskId = generateIntId();
 
       // Set the task ID
       task.id = taskId;

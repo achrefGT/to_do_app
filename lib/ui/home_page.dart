@@ -11,8 +11,8 @@ import 'package:to_do_app/services/notification_services.dart';
 import 'package:to_do_app/ui/theme.dart';
 import 'package:to_do_app/ui/widgets/button.dart';
 
-import '../auth/auth_service.dart';
-import '../auth/login_screen.dart';
+import '../services/auth_service.dart';
+import 'login_screen.dart';
 import '../models/task.dart';
 import 'add_task_bar.dart';
 import 'widgets/task_tile.dart';

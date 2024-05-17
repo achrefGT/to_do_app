@@ -9,7 +9,7 @@ import 'package:to_do_app/ui/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 
-import 'auth/login_screen.dart';
+import 'ui/login_screen.dart';
 import 'ui/home_page.dart';
 
 void main() async {
