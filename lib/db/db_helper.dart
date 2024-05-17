@@ -49,18 +49,28 @@ class DBHelper {
 
 
 
-  static Future<List<Map<String, dynamic>>> query() async {
+  static Future<List<Map<String, dynamic>>> query(bool urgent) async {
     try {
-      // Get the current user ID
       final FirebaseAuth auth = FirebaseAuth.instance;
       final User? user = auth.currentUser;
 
       if (user != null) {
         // User is authenticated, proceed to query tasks
         String userId = user.uid;
+        QuerySnapshot querySnapshot;
 
-        // Query tasks where userId matches the current user's ID
-        QuerySnapshot querySnapshot = await _tasksCollection.where('userId', isEqualTo: userId).get();
+        if (urgent) {
+          // Query urgent tasks (color = 2)
+          querySnapshot = await _tasksCollection
+              .where('userId', isEqualTo: userId)
+              .where('color', isEqualTo: 1)
+              .get();
+        } else {
+          // Query all tasks for the user
+          querySnapshot = await _tasksCollection
+              .where('userId', isEqualTo: userId)
+              .get();
+        }
 
         // Convert the QuerySnapshot to a List<Map<String, dynamic>>
         return querySnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
@@ -74,6 +84,7 @@ class DBHelper {
       return []; // Return an empty list in case of error
     }
   }
+
 
 
   static Future<void> delete(Task task) async {

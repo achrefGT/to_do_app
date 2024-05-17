@@ -7,20 +7,17 @@ import 'package:intl/intl.dart';
 import 'package:to_do_app/controllers/task_controller.dart';
 import 'package:to_do_app/services/theme_services.dart';
 import 'package:to_do_app/services/notification_services.dart';
-
 import 'package:to_do_app/ui/theme.dart';
 import 'package:to_do_app/ui/widgets/button.dart';
-
 import '../services/auth_service.dart';
 import 'login_screen.dart';
 import '../models/task.dart';
 import 'add_task_bar.dart';
 import 'widgets/task_tile.dart';
 
-
-
 class HomePageUi extends ConsumerStatefulWidget {
   const HomePageUi({Key? key}) : super(key: key);
+
   @override
   ConsumerState<HomePageUi> createState() => _HomePageUiState();
 }
@@ -28,11 +25,20 @@ class HomePageUi extends ConsumerStatefulWidget {
 class _HomePageUiState extends ConsumerState<HomePageUi> {
   NotifyHelper notifyHelper = NotifyHelper();
   DateTime _selectedDate = DateTime.now();
+  List<Task> _urgentTasks = [];
+
   @override
   void initState() {
     notifyHelper.initializeNotification();
     notifyHelper.requestIOSPermissions();
     super.initState();
+  }
+
+  Future<void> _fetchUrgentTasks() async {
+    final tasks = await ref.read(taskController).getUrgentTasks(); // Fetch urgent tasks from the controller
+    setState(() {
+      _urgentTasks = tasks;
+    });
   }
 
   @override
@@ -48,8 +54,52 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
             height: 10,
           ),
           _showTasks(),
+          _urgentTasksButton(), // Add the urgent tasks button here
+
         ],
       ),
+    );
+  }
+
+  Widget _urgentTasksButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: MyButton(
+        lable: "Urgent tasks",
+        onTap: () async {
+          await _fetchUrgentTasks();
+          _showUrgentTasks();
+        },
+        color: pinkClr, // Custom color
+        width: 350, // Custom width
+      ),
+    );
+  }
+
+  void _showUrgentTasks() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: MediaQuery.of(context).size.height * 0.5,
+          child: _urgentTasks.isEmpty
+              ? const Center(child: Text("No urgent tasks found."))
+              : ListView.builder(
+            itemCount: _urgentTasks.length,
+            itemBuilder: (context, index) {
+              final task = _urgentTasks[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet before showing the task details
+                  _showBottomSheet(context, task);
+                },
+                child: TaskTile(task),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -138,82 +188,80 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
     );
   }
 
-
   _showBottomSheet(BuildContext context, Task task) {
     final bool isDarkTheme = ref.watch(appThemeProvider).getTheme();
     showModalBottomSheet(
-        clipBehavior: Clip.hardEdge,
-        // backgroundColor: Colors.transparent,
-        barrierColor: Colors.transparent,
-        context: context,
-        builder: (context) {
-          return Container(
-            color: Colors.transparent,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              decoration: BoxDecoration(
-                  color: isDarkTheme ? darkGreyClr : Colors.white,
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20))),
-              height: task.isCompleted == true
-                  ? MediaQuery.of(context).size.height * 0.24
-                  : MediaQuery.of(context).size.height * 0.32,
-              child: Column(
-                children: [
-                  Container(
-                    height: 6,
-                    width: 120,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color:
-                            isDarkTheme ? Colors.grey[600] : Colors.grey[300]),
-                  ),
-                  const Spacer(),
-                  task.isCompleted == true
-                      ? Container()
-                      : _bottomSheetButton(
-                      context: context,
-                      label: "Task Completed",
-                      onTap: () {
-                        ref.read(taskController).update(task);
-                        ref.refresh(getTasksController.future);
-                        Navigator.pop(context);
-                      },
-                      color: primaryClr),
-                  _bottomSheetButton(
-                    context: context,
-                    label: "Delete Task",
-                    onTap: () {
-                      ref.read(taskController).delete(task);
-                      ref.refresh(getTasksController.future);
-                      Navigator.pop(context);
-                    },
-                    color: Colors.red[300]!,
-                  ),
-
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  _bottomSheetButton(
-                      context: context,
-                      label: "Close",
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      color: Colors.red[300]!,
-                      isClose: true),
-                  const SizedBox(
-                    height: 10,
-                  )
-                ],
+      clipBehavior: Clip.hardEdge,
+      barrierColor: Colors.transparent,
+      context: context,
+      builder: (context) {
+        return Container(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 10,
+            ),
+            decoration: BoxDecoration(
+              color: isDarkTheme ? darkGreyClr : Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-          );
-        });
+            height: task.isCompleted == true
+                ? MediaQuery.of(context).size.height * 0.24
+                : MediaQuery.of(context).size.height * 0.32,
+            child: Column(
+              children: [
+                Container(
+                  height: 6,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isDarkTheme ? Colors.grey[600] : Colors.grey[300],
+                  ),
+                ),
+                const Spacer(),
+                task.isCompleted == true
+                    ? Container()
+                    : _bottomSheetButton(
+                  context: context,
+                  label: "Task Completed",
+                  onTap: () {
+                    ref.read(taskController).update(task);
+                    ref.refresh(getTasksController.future);
+                    Navigator.pop(context);
+                  },
+                  color: primaryClr,
+                ),
+                _bottomSheetButton(
+                  context: context,
+                  label: "Delete Task",
+                  onTap: () {
+                    ref.read(taskController).delete(task);
+                    ref.refresh(getTasksController.future);
+                    Navigator.pop(context);
+                  },
+                  color: Colors.red[300]!,
+                ),
+                const SizedBox(height: 20),
+                _bottomSheetButton(
+                  context: context,
+                  label: "Close",
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  color: Colors.red[300]!,
+                  isClose: true,
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   _bottomSheetButton({
@@ -233,12 +281,13 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
         decoration: BoxDecoration(
           color: isClose == true ? Colors.transparent : color,
           border: Border.all(
-              color: isClose == true
-                  ? isDarkTheme
-                      ? Colors.grey[600]!
-                      : Colors.grey[300]!
-                  : color,
-              width: 2),
+            color: isClose == true
+                ? isDarkTheme
+                ? Colors.grey[600]!
+                : Colors.grey[300]!
+                : color,
+            width: 2,
+          ),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
@@ -247,8 +296,8 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
             style: isClose
                 ? titleStyle
                 : titleStyle.copyWith(
-                    color: Colors.white,
-                  ),
+              color: Colors.white,
+            ),
           ),
         ),
       ),
@@ -266,11 +315,20 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
         selectionColor: primaryClr,
         selectedTextColor: white,
         dateTextStyle: GoogleFonts.lato().copyWith(
-            fontSize: 20, fontWeight: FontWeight.w600, color: Colors.grey),
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey,
+        ),
         dayTextStyle: GoogleFonts.lato().copyWith(
-            fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey),
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey,
+        ),
         monthTextStyle: GoogleFonts.lato().copyWith(
-            fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey),
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey,
+        ),
         onDateChange: (date) {
           setState(() {
             _selectedDate = date;
@@ -301,23 +359,26 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
               Text(
                 "Today",
                 style: headingStyle,
-              )
+              ),
             ],
           ),
           MyButton(
-              lable: "+ Add Task",
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AddTaskPage()));
-              })
+            lable: "+ Add Task",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddTaskPage(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  _appBar() {
+  AppBar _appBar() {
     final bool isDarkTheme = ref.watch(appThemeProvider).getTheme();
     final auth = AuthService();
     return AppBar(
@@ -327,16 +388,17 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
         onTap: () {
           ref.watch(appThemeProvider.notifier).setTheme(!isDarkTheme);
           notifyHelper.displayNotification(
-              title: "Theme Changed",
-              body: isDarkTheme
-                  ? "Acticated Light Theme"
-                  : "Acticated Dark Theme");
-          // notifyHelper.scheduledNotification();
+            title: "Theme Changed",
+            body: isDarkTheme
+                ? "Activated Light Theme"
+                : "Activated Dark Theme",
+          );
         },
         child: Icon(
-            isDarkTheme ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-            size: 20,
-            color: isDarkTheme ? Colors.white : Colors.black),
+          isDarkTheme ? Icons.wb_sunny_outlined : Icons.nightlight_round,
+          size: 20,
+          color: isDarkTheme ? Colors.white : Colors.black,
+        ),
       ),
       actions: [
         IconButton(
@@ -345,11 +407,7 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
             size: 20,
             color: isDarkTheme ? Colors.white : Colors.black,
           ),
-
           onPressed: () async {
-
-
-
             // Perform sign out
             await auth.signout();
 
@@ -357,14 +415,13 @@ class _HomePageUiState extends ConsumerState<HomePageUi> {
             goToLogin(context);
           },
         ),
-        SizedBox(width: 20),
+        const SizedBox(width: 20),
       ],
     );
   }
 
-  goToLogin(BuildContext context) => Navigator.push(
+  void goToLogin(BuildContext context) => Navigator.push(
     context,
     MaterialPageRoute(builder: (context) => const LoginScreen()),
   );
-
 }

@@ -20,7 +20,7 @@ class TaskController {
 
   Future<List<Task>> getTasks() async {
     try {
-      List<Map<String, dynamic>> result = await DBHelper.query();
+      List<Map<String, dynamic>> result = await DBHelper.query(false);
       final tasks = result.map((data) => Task.fromMap(data)).toList();
       return tasks;
     } catch (e) {
@@ -38,4 +38,16 @@ class TaskController {
   void update(Task task) async {
     await DBHelper.update(task);
   }
+
+  Future<List<Task>> getUrgentTasks() async {
+    try {
+      List<Map<String, dynamic>> result = await DBHelper.query(true);
+      final tasks = result.map((data) => Task.fromMap(data)).toList();
+      return tasks;
+    } catch (e) {
+      print("Error fetching urgent tasks from database: $e");
+      return []; // Return an empty list in case of error
+    }
+  }
+
 }
